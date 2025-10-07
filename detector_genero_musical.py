@@ -200,17 +200,30 @@ class DetectorGeneroMusical:
             matches_simple = re.finditer(patron_simple, contenido, re.IGNORECASE)
 
             # Patrón 2: Nombre + Apellido(s) - Más específico
-            # Captura: "Manuel de Falla", "José García López", "Isaac Albéniz"
-            # Busca nombre + partícula (opcional) + apellido + segundo apellido (opcional)
-            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+)?[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?\b'
+            # Captura nombres completos en español, francés, inglés y alemán:
+            # Español: "Manuel de Falla", "José García López", "Isaac Albéniz"
+            # Francés: "Claude Debussy", "Maurice Ravel", "Gabriel Fauré"
+            # Inglés: "George Gershwin", "Benjamin Britten", "William Byrd"
+            # Alemán: "Ludwig van Beethoven", "Johann Sebastian Bach", "Richard Wagner"
+            # Busca: nombre + partícula (opcional) + apellido(s) con mayúscula inicial
+            # IMPORTANTE: Usa lookahead negativo (?![a-záéíóúñ]) para NO capturar verbos en minúscula
+            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+|der\s+|den\s+|zu\s+|vom\s+|le\s+|la\s+|du\s+|des\s+|d\')?([A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+(?:\s+(?:de\s+|del\s+|von\s+|van\s+|der\s+|zu\s+)?[A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+)?)(?=\s+[a-záéíóúñäöüßàâæçèéêëîïôùûü]|\s*[.,;:!?]|\s*$)'
             matches_completos = list(re.finditer(patron_completo, contenido, re.IGNORECASE))
 
             # Contar coincidencias de nombres completos (prioritario)
             if matches_completos:
                 for match in matches_completos:
-                    nombre_completo = match.group(0)
-                    # Limpiar: remover palabras en minúscula al final (verbos, artículos)
-                    nombre_completo = re.sub(r'\s+[a-záéíóúñ]+$', '', nombre_completo)
+                    # Extraer nombre completo: Nombre + Apellido(s) capturado
+                    nombre_base = nombre.capitalize()
+                    apellidos = match.group(1)  # Grupo de captura con apellido(s)
+
+                    # Limpiar verbos comunes en español que empiecen con minúscula
+                    # Lista de verbos frecuentes en contextos biográficos
+                    verbos_comunes = r'\s+(fue|era|nació|murió|compuso|escribió|cantó|tocó|dirigió|interpretó|estudió|vivió|trabajó|falleció|creó|realizó|presentó|actuó|grabó|' \
+                                   r'es|está|será|tiene|había|tuvo|hizo|dio|llegó|pasó|comenzó|terminó|acabó|dejó|vino|volvió|siguió|llevó|produjo|ganó|recibió|obtuvo)'
+                    apellidos_limpios = re.sub(verbos_comunes + r'$', '', apellidos, flags=re.IGNORECASE)
+
+                    nombre_completo = f"{nombre_base} {apellidos_limpios}"
                     nombres_detectados['masculinos_completos'].append(nombre_completo)
                     nombres_detectados['masculinos'][nombre] += 1
             else:
@@ -226,16 +239,29 @@ class DetectorGeneroMusical:
             matches_simple = re.finditer(patron_simple, contenido, re.IGNORECASE)
 
             # Patrón 2: Nombre + Apellido(s)
-            # Captura: "María Callas", "Carmen de Burgos", "Rosa García Ascot"
-            # Busca nombre + partícula (opcional) + apellido + segundo apellido (opcional)
-            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+)?[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?\b'
+            # Captura nombres completos en español, francés, inglés y alemán:
+            # Español: "María Callas", "Carmen de Burgos", "Rosa García Ascot"
+            # Francés: "Germaine Tailleferre", "Nadia Boulanger", "Lili Boulanger"
+            # Inglés: "Elizabeth Maconchy", "Rebecca Clarke", "Amy Beach"
+            # Alemán: "Clara Schumann", "Fanny Mendelssohn", "Alma Mahler"
+            # Busca: nombre + partícula (opcional) + apellido(s) con mayúscula inicial
+            # IMPORTANTE: Usa lookahead negativo (?![a-záéíóúñ]) para NO capturar verbos en minúscula
+            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+|der\s+|den\s+|zu\s+|vom\s+|le\s+|la\s+|du\s+|des\s+|d\')?([A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+(?:\s+(?:de\s+|del\s+|von\s+|van\s+|der\s+|zu\s+)?[A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+)?)(?=\s+[a-záéíóúñäöüßàâæçèéêëîïôùûü]|\s*[.,;:!?]|\s*$)'
             matches_completos = list(re.finditer(patron_completo, contenido, re.IGNORECASE))
 
             if matches_completos:
                 for match in matches_completos:
-                    nombre_completo = match.group(0)
-                    # Limpiar: remover palabras en minúscula al final (verbos, artículos)
-                    nombre_completo = re.sub(r'\s+[a-záéíóúñ]+$', '', nombre_completo)
+                    # Extraer nombre completo: Nombre + Apellido(s) capturado
+                    nombre_base = nombre.capitalize()
+                    apellidos = match.group(1)  # Grupo de captura con apellido(s)
+
+                    # Limpiar verbos comunes en español que empiecen con minúscula
+                    # Lista de verbos frecuentes en contextos biográficos
+                    verbos_comunes = r'\s+(fue|era|nació|murió|compuso|escribió|cantó|tocó|dirigió|interpretó|estudió|vivió|trabajó|falleció|creó|realizó|presentó|actuó|grabó|' \
+                                   r'es|está|será|tiene|había|tuvo|hizo|dio|llegó|pasó|comenzó|terminó|acabó|dejó|vino|volvió|siguió|llevó|produjo|ganó|recibió|obtuvo)'
+                    apellidos_limpios = re.sub(verbos_comunes + r'$', '', apellidos, flags=re.IGNORECASE)
+
+                    nombre_completo = f"{nombre_base} {apellidos_limpios}"
                     nombres_detectados['femeninos_completos'].append(nombre_completo)
                     nombres_detectados['femeninos'][nombre] += 1
             else:
@@ -583,17 +609,18 @@ class DetectorGeneroMusical:
                     'ratio': archivo['totales']['ratio_sesgo']
                 })
 
-        # Top nombres detectados
-        todos_nombres_masc = Counter()
-        todos_nombres_fem = Counter()
+        # Top nombres completos detectados
+        todos_nombres_completos_masc = Counter()
+        todos_nombres_completos_fem = Counter()
         for archivo in self.resultados['archivos']:
-            for nombre, count in archivo['detecciones']['nombres']['masculinos'].items():
-                todos_nombres_masc[nombre] += count
-            for nombre, count in archivo['detecciones']['nombres']['femeninos'].items():
-                todos_nombres_fem[nombre] += count
+            # Contar nombres completos (prioritario)
+            for nombre_completo in archivo['detecciones']['nombres']['masculinos_completos']:
+                todos_nombres_completos_masc[nombre_completo] += 1
+            for nombre_completo in archivo['detecciones']['nombres']['femeninos_completos']:
+                todos_nombres_completos_fem[nombre_completo] += 1
 
-        top_nombres_masc = todos_nombres_masc.most_common(10)
-        top_nombres_fem = todos_nombres_fem.most_common(10)
+        top_nombres_masc = todos_nombres_completos_masc.most_common(10)
+        top_nombres_fem = todos_nombres_completos_fem.most_common(10)
 
         # Generar HTML
         html_content = f"""<!DOCTYPE html>
@@ -909,15 +936,15 @@ class DetectorGeneroMusical:
             </div>
 
             <div class="chart-container">
-                <h2>👥 Nombres Más Mencionados</h2>
+                <h2>👥 Personas Más Mencionadas (Nombres Completos)</h2>
                 <div class="top-names">
                     <div class="names-list masculino">
                         <h3>👨 Top 10 Masculinos</h3>
-                        {''.join([f'<div class="name-item"><span class="name">{nombre.capitalize()}</span><span class="count">{count} menciones</span></div>' for nombre, count in top_nombres_masc])}
+                        {''.join([f'<div class="name-item"><span class="name">{nombre}</span><span class="count">{count} menciones</span></div>' for nombre, count in top_nombres_masc])}
                     </div>
                     <div class="names-list femenino">
                         <h3>👩 Top 10 Femeninos</h3>
-                        {''.join([f'<div class="name-item"><span class="name">{nombre.capitalize()}</span><span class="count">{count} menciones</span></div>' for nombre, count in top_nombres_fem])}
+                        {''.join([f'<div class="name-item"><span class="name">{nombre}</span><span class="count">{count} menciones</span></div>' for nombre, count in top_nombres_fem])}
                     </div>
                 </div>
             </div>
