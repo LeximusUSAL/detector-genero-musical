@@ -482,6 +482,20 @@ class DetectorGeneroMusical:
         resumen = self.resultados['resumen_general']
         meta = self.resultados['metadata']
 
+        # Consolidar nombres de todos los archivos
+        nombres_masculinos_total = Counter()
+        nombres_femeninos_total = Counter()
+
+        for archivo in self.resultados['archivos']:
+            for nombre, count in archivo['detecciones']['nombres']['masculinos'].items():
+                nombres_masculinos_total[nombre] += count
+            for nombre, count in archivo['detecciones']['nombres']['femeninos'].items():
+                nombres_femeninos_total[nombre] += count
+
+        # Top 10 nombres
+        top_masculinos = nombres_masculinos_total.most_common(10)
+        top_femeninos = nombres_femeninos_total.most_common(10)
+
         html_content = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -589,6 +603,94 @@ class DetectorGeneroMusical:
             font-size: 0.9em;
             color: #666;
         }}
+        .details-section {{
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid #e0e0e0;
+        }}
+        .details-section h2 {{
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }}
+        .top-names {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }}
+        .names-column h3 {{
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }}
+        .names-column.female h3 {{
+            color: #f687b3;
+        }}
+        .name-item {{
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }}
+        .name-item .name {{
+            font-weight: 600;
+            text-transform: capitalize;
+        }}
+        .name-item .count {{
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }}
+        .names-column.female .name-item .count {{
+            background: #f687b3;
+        }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }}
+        th {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }}
+        td {{
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }}
+        tr:hover {{
+            background: #f8f9fa;
+        }}
+        .ratio-badge {{
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }}
+        .ratio-extreme {{
+            background: #fee;
+            color: #c33;
+        }}
+        .ratio-high {{
+            background: #fffbeb;
+            color: #92400e;
+        }}
+        .ratio-moderate {{
+            background: #f0fdf4;
+            color: #166534;
+        }}
         footer {{
             text-align: center;
             margin-top: 40px;
@@ -670,10 +772,88 @@ class DetectorGeneroMusical:
             <canvas id="comparisonChart"></canvas>
         </div>
 
+        <div class="details-section">
+            <h2>🏆 Top 10 Nombres Más Mencionados</h2>
+            <div class="top-names">
+                <div class="names-column male">
+                    <h3>👨 Masculinos</h3>
+"""
+
+        # Agregar nombres masculinos
+        for nombre, count in top_masculinos:
+            html_content += f"""
+                    <div class="name-item">
+                        <span class="name">{nombre.capitalize()}</span>
+                        <span class="count">{count:,}</span>
+                    </div>
+"""
+
+        html_content += """
+                </div>
+                <div class="names-column female">
+                    <h3>👩 Femeninos</h3>
+"""
+
+        # Agregar nombres femeninos
+        for nombre, count in top_femeninos:
+            html_content += f"""
+                    <div class="name-item">
+                        <span class="name">{nombre.capitalize()}</span>
+                        <span class="count">{count:,}</span>
+                    </div>
+"""
+
+        html_content += """
+                </div>
+            </div>
+        </div>
+
+        <div class="details-section">
+            <h2>📊 Archivos con Mayor Sesgo de Género</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Archivo</th>
+                        <th>Masculino</th>
+                        <th>Femenino</th>
+                        <th>Ratio</th>
+                    </tr>
+                </thead>
+                <tbody>
+"""
+
+        # Top 15 archivos con mayor sesgo
+        archivos_ordenados = sorted(
+            [a for a in self.resultados['archivos']
+             if a['totales']['ratio_sesgo'] != float('inf') and a['totales']['ratio_sesgo'] > 0],
+            key=lambda x: x['totales']['ratio_sesgo'],
+            reverse=True
+        )[:15]
+
+        for i, archivo in enumerate(archivos_ordenados, 1):
+            ratio = archivo['totales']['ratio_sesgo']
+            ratio_class = 'ratio-extreme' if ratio > 10 else ('ratio-high' if ratio > 5 else 'ratio-moderate')
+
+            html_content += f"""
+                    <tr>
+                        <td><strong>{i}</strong></td>
+                        <td>{archivo['archivo']}</td>
+                        <td>{archivo['totales']['menciones_masculinas']}</td>
+                        <td>{archivo['totales']['menciones_femeninas']}</td>
+                        <td><span class="ratio-badge {ratio_class}">{ratio}:1</span></td>
+                    </tr>
+"""
+
+        html_content += """
+                </tbody>
+            </table>
+        </div>
+
         <div class="metadata">
-            <strong>📂 Directorio analizado:</strong> {meta['directorio']}<br>
-            <strong>📅 Fecha de análisis:</strong> {meta['fecha_analisis']}<br>
-            <strong>📝 Total palabras procesadas:</strong> {meta['total_palabras']:,}
+            <strong>📂 Directorio analizado:</strong> """ + meta['directorio'] + """<br>
+            <strong>📅 Fecha de análisis:</strong> """ + meta['fecha_analisis'] + """<br>
+            <strong>📝 Total palabras procesadas:</strong> """ + f"{meta['total_palabras']:,}" + """
         </div>
 
         <footer>
