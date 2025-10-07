@@ -9,6 +9,8 @@
 
 ## 📋 Índice
 
+> 📘 **¿Primera vez usando Python o Terminal?** Consulta la **[Guía para Principiantes](GUIA_PRINCIPIANTES.md)** con instrucciones visuales paso a paso.
+
 1. [Introducción](#introducción)
 2. [Instalación](#instalación)
 3. [Uso Básico](#uso-básico)

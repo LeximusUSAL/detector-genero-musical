@@ -44,6 +44,8 @@ Este script permite **replicar y extender** estos análisis en otros corpus.
 
 ## 🚀 Inicio Rápido
 
+> 📘 **¿Primera vez usando Python o Terminal?** Lee la **[Guía para Principiantes](GUIA_PRINCIPIANTES.md)** con instrucciones paso a paso sin conocimientos técnicos.
+
 ### 1. Requisitos
 
 - Python 3.7 o superior
