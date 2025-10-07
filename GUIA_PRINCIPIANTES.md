@@ -76,38 +76,7 @@ Mi_Carpeta_de_Textos/
 
 ---
 
-## ▶️ Paso 3: Configurar la ruta de tus archivos
-
-**ANTES DE EJECUTAR**, debes indicarle al programa dónde están tus archivos `.txt`:
-
-1. **Abre el archivo** `detector_genero_musical.py` con un editor de texto:
-   - **Mac**: Haz clic derecho > Abrir con > TextEdit
-   - **Windows**: Haz clic derecho > Abrir con > Bloc de notas
-
-2. **Busca la línea 486** (casi al final del archivo). Verás esto:
-   ```python
-   directorio_base = "/Users/maria/Desktop/VARIOS/REVISTAS Y NOVEDADES LEXIMUS/REVISTAS TXT PARA WEBS ESTADÍSTICAS"
-   ```
-
-3. **Cambia esa ruta** por la ruta donde TÚ tienes tus archivos `.txt`:
-
-   **Ejemplo Mac:**
-   ```python
-   directorio_base = "/Users/TuNombre/Desktop/MisRevistas"
-   ```
-
-   **Ejemplo Windows:**
-   ```python
-   directorio_base = "C:/Users/TuNombre/Desktop/MisRevistas"
-   ```
-
-   **⚠️ IMPORTANTE EN WINDOWS:** Usa `/` (barra normal) en vez de `\` (barra invertida)
-
-4. **Guarda el archivo** (Cmd+S en Mac, Ctrl+S en Windows)
-
----
-
-## ▶️ Paso 4: Ejecutar el programa
+## ▶️ Paso 3: Ejecutar el programa
 
 ### En Mac:
 
@@ -119,10 +88,12 @@ Mi_Carpeta_de_Textos/
    ```
    *(Asume que descomprimiste y renombraste la carpeta en el escritorio)*
 
-3. **Ejecuta el programa**:
+3. **Ejecuta el programa** (copia y pega TODA esta línea):
    ```bash
-   python3 detector_genero_musical.py
+   python3 detector_genero_musical.py ~/Desktop/Mi_Carpeta_de_Textos
    ```
+
+   **¡OJO!** Cambia `~/Desktop/Mi_Carpeta_de_Textos` por la **ruta real** donde tienes tus archivos `.txt`
 
 ### En Windows:
 
@@ -135,8 +106,10 @@ Mi_Carpeta_de_Textos/
 
 3. **Ejecuta el programa**:
    ```bash
-   python detector_genero_musical.py
+   python detector_genero_musical.py C:\Users\TuNombre\Desktop\Mi_Carpeta_de_Textos
    ```
+
+   **¡OJO!** Cambia la ruta por donde tienes tus archivos
 
 ---
 
@@ -157,7 +130,7 @@ Mi_Carpeta_de_Textos/
 
 ---
 
-## ✅ Paso 5: Ver los resultados
+## ✅ Paso 4: Ver los resultados
 
 El programa creará **3 archivos** en la misma carpeta donde está el script:
 
@@ -228,29 +201,24 @@ El programa creará **3 archivos** en la misma carpeta donde está el script:
 **Pasos:**
 
 1. **Descargar el programa** (Opción A del Paso 1)
-2. **Editar** `detector_genero_musical.py` y cambiar la línea 486:
-   ```python
-   directorio_base = "/Users/TuNombre/Desktop/MisRevistas"
-   ```
-3. **Guardar** el archivo
-4. **Abrir Terminal** (Mac) o Símbolo del sistema (Windows)
-5. **Escribir**:
+2. **Abrir Terminal** (Mac) o Símbolo del sistema (Windows)
+3. **Escribir**:
 
    **Mac:**
    ```bash
    cd ~/Desktop/detector-genero-musical
-   python3 detector_genero_musical.py
+   python3 detector_genero_musical.py ~/Desktop/MisRevistas
    ```
 
    **Windows:**
    ```bash
    cd %USERPROFILE%\Desktop\detector-genero-musical
-   python detector_genero_musical.py
+   python detector_genero_musical.py %USERPROFILE%\Desktop\MisRevistas
    ```
 
-6. **Esperar** (puede tardar unos segundos/minutos)
-7. **Abrir** `analisis_genero.html` (doble clic)
-8. **Ver los gráficos** 🎉
+4. **Esperar** (puede tardar unos segundos/minutos)
+5. **Abrir** `analisis_genero.html` (doble clic)
+6. **Ver los gráficos** 🎉
 
 ---
 

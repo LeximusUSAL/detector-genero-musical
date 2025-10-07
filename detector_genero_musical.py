@@ -18,6 +18,7 @@ Licencia: MIT
 import os
 import re
 import json
+import sys
 from collections import Counter, defaultdict
 from datetime import datetime
 
@@ -480,13 +481,28 @@ def main():
     """
     Ejecuta el análisis completo
 
-    MODIFICAR ESTA RUTA según tu estructura de directorios:
+    Uso:
+        python3 detector_genero_musical.py /ruta/a/tus/archivos/txt
     """
-    # RUTA DE EJEMPLO - MODIFICAR SEGÚN TU CASO
-    directorio_base = "/Users/maria/Desktop/REVISTAS TXT PARA WEBS ESTADÍSTICAS"
+    # Verificar argumentos de línea de comandos
+    if len(sys.argv) < 2:
+        print("❌ ERROR: Debes especificar la ruta al directorio con archivos TXT")
+        print("\nUso:")
+        print("  python3 detector_genero_musical.py /ruta/a/tus/archivos/txt")
+        print("\nEjemplo:")
+        print("  python3 detector_genero_musical.py ~/Desktop/MisRevistas")
+        sys.exit(1)
 
-    # También puedes analizar un subdirectorio específico:
-    # directorio_base = "/Users/maria/Desktop/REVISTAS TXT PARA WEBS ESTADÍSTICAS/TXT-ElSol"
+    directorio_base = sys.argv[1]
+
+    # Verificar que el directorio existe
+    if not os.path.exists(directorio_base):
+        print(f"❌ ERROR: El directorio no existe: {directorio_base}")
+        sys.exit(1)
+
+    if not os.path.isdir(directorio_base):
+        print(f"❌ ERROR: La ruta no es un directorio: {directorio_base}")
+        sys.exit(1)
 
     print("🎵 DETECTOR AUTOMÁTICO DE GÉNERO EN PERSONAS MUSICALES")
     print("="*80)
