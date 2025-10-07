@@ -472,6 +472,320 @@ class DetectorGeneroMusical:
         print(f"✅ Reporte guardado en: {output_file}")
         return output_file
 
+    def generar_web_interactiva(self, output_file='analisis_genero.html'):
+        """
+        Genera una página web interactiva con gráficos usando Chart.js
+
+        Args:
+            output_file (str): Nombre del archivo HTML de salida
+        """
+        resumen = self.resultados['resumen_general']
+        meta = self.resultados['metadata']
+
+        html_content = f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Género en Personas Musicales</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }}
+        .container {{
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }}
+        h1 {{
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }}
+        .subtitle {{
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }}
+        .stats-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }}
+        .stat-card {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }}
+        .stat-card:hover {{
+            transform: translateY(-5px);
+        }}
+        .stat-card h3 {{
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }}
+        .stat-card .number {{
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }}
+        .chart-container {{
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }}
+        .chart-container h2 {{
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }}
+        .alert {{
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }}
+        .alert-danger {{
+            background: #fee;
+            border-left: 5px solid #f44;
+            color: #c33;
+        }}
+        .alert-warning {{
+            background: #fffbeb;
+            border-left: 5px solid #f59e0b;
+            color: #92400e;
+        }}
+        .alert-success {{
+            background: #f0fdf4;
+            border-left: 5px solid #22c55e;
+            color: #166534;
+        }}
+        .metadata {{
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #666;
+        }}
+        footer {{
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            color: #666;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Análisis de Género en Personas Musicales</h1>
+        <p class="subtitle">Proyecto LexiMus - Universidad de Salamanca</p>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>👨 Menciones Masculinas</h3>
+                <div class="number">{resumen['menciones_masculinas_total']:,}</div>
+                <div>{resumen['porcentaje_masculino']}% del total</div>
+            </div>
+            <div class="stat-card">
+                <h3>👩 Menciones Femeninas</h3>
+                <div class="number">{resumen['menciones_femeninas_total']:,}</div>
+                <div>{resumen['porcentaje_femenino']}% del total</div>
+            </div>
+            <div class="stat-card">
+                <h3>📊 Ratio de Sesgo</h3>
+                <div class="number">{resumen['ratio_sesgo_general']}:1</div>
+                <div>Masculino/Femenino</div>
+            </div>
+            <div class="stat-card">
+                <h3>📄 Archivos Analizados</h3>
+                <div class="number">{meta['total_archivos']}</div>
+                <div>{meta['total_palabras']:,} palabras</div>
+            </div>
+        </div>
+"""
+
+        # Alerta según el nivel de sesgo
+        ratio = resumen['ratio_sesgo_general']
+        if ratio > 10:
+            html_content += f"""
+        <div class="alert alert-danger">
+            <strong>❌ Sesgo Extremo Detectado ({ratio}:1)</strong><br>
+            Se observa una dominancia masculina severa en el corpus analizado.
+            Por cada mención femenina hay {ratio} menciones masculinas.
+        </div>
+"""
+        elif ratio > 5:
+            html_content += f"""
+        <div class="alert alert-warning">
+            <strong>⚠️ Sesgo Alto Detectado ({ratio}:1)</strong><br>
+            Existe un desbalance significativo en la representación de género.
+        </div>
+"""
+        elif ratio > 2:
+            html_content += f"""
+        <div class="alert alert-warning">
+            <strong>⚠️ Sesgo Moderado ({ratio}:1)</strong><br>
+            Se detecta un desbalance moderado en la representación de género.
+        </div>
+"""
+        else:
+            html_content += f"""
+        <div class="alert alert-success">
+            <strong>✅ Representación Relativamente Equilibrada ({ratio}:1)</strong><br>
+            El corpus muestra una representación más balanceada entre géneros.
+        </div>
+"""
+
+        html_content += f"""
+        <div class="chart-container">
+            <h2>Distribución por Género</h2>
+            <canvas id="genderChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>Comparativa de Menciones</h2>
+            <canvas id="comparisonChart"></canvas>
+        </div>
+
+        <div class="metadata">
+            <strong>📂 Directorio analizado:</strong> {meta['directorio']}<br>
+            <strong>📅 Fecha de análisis:</strong> {meta['fecha_analisis']}<br>
+            <strong>📝 Total palabras procesadas:</strong> {meta['total_palabras']:,}
+        </div>
+
+        <footer>
+            <p><strong>LexiMus: Léxico y ontología de la música en español</strong></p>
+            <p>Universidad de Salamanca | Instituto Complutense de Ciencias Musicales | Universidad de La Rioja</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                🤖 Generado con <a href="https://claude.com/claude-code" target="_blank">Claude Code</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Gráfico de Pastel
+        const ctx1 = document.getElementById('genderChart').getContext('2d');
+        new Chart(ctx1, {{
+            type: 'pie',
+            data: {{
+                labels: ['Masculino', 'Femenino'],
+                datasets: [{{
+                    data: [{resumen['menciones_masculinas_total']}, {resumen['menciones_femeninas_total']}],
+                    backgroundColor: ['#667eea', '#f687b3'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }}]
+            }},
+            options: {{
+                responsive: true,
+                plugins: {{
+                    legend: {{
+                        position: 'bottom',
+                        labels: {{
+                            font: {{ size: 14 }},
+                            padding: 20
+                        }}
+                    }},
+                    tooltip: {{
+                        callbacks: {{
+                            label: function(context) {{
+                                let label = context.label || '';
+                                let value = context.parsed || 0;
+                                let total = {resumen['menciones_masculinas_total'] + resumen['menciones_femeninas_total']};
+                                let percentage = ((value / total) * 100).toFixed(1);
+                                return label + ': ' + value.toLocaleString() + ' (' + percentage + '%)';
+                            }}
+                        }}
+                    }}
+                }}
+            }}
+        }});
+
+        // Gráfico de Barras
+        const ctx2 = document.getElementById('comparisonChart').getContext('2d');
+        new Chart(ctx2, {{
+            type: 'bar',
+            data: {{
+                labels: ['Menciones Totales'],
+                datasets: [
+                    {{
+                        label: 'Masculino',
+                        data: [{resumen['menciones_masculinas_total']}],
+                        backgroundColor: '#667eea',
+                        borderRadius: 10
+                    }},
+                    {{
+                        label: 'Femenino',
+                        data: [{resumen['menciones_femeninas_total']}],
+                        backgroundColor: '#f687b3',
+                        borderRadius: 10
+                    }}
+                ]
+            }},
+            options: {{
+                responsive: true,
+                scales: {{
+                    y: {{
+                        beginAtZero: true,
+                        ticks: {{
+                            callback: function(value) {{
+                                return value.toLocaleString();
+                            }}
+                        }}
+                    }}
+                }},
+                plugins: {{
+                    legend: {{
+                        position: 'bottom',
+                        labels: {{
+                            font: {{ size: 14 }},
+                            padding: 20
+                        }}
+                    }},
+                    tooltip: {{
+                        callbacks: {{
+                            label: function(context) {{
+                                return context.dataset.label + ': ' + context.parsed.y.toLocaleString();
+                            }}
+                        }}
+                    }}
+                }}
+            }}
+        }});
+    </script>
+</body>
+</html>
+"""
+
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+
+        print(f"✅ Web interactiva generada: {output_file}")
+        return output_file
+
 
 # ==========================================================================
 # FUNCIÓN PRINCIPAL
@@ -517,6 +831,7 @@ def main():
     # Guardar resultados
     detector.guardar_resultados('resultados_deteccion_genero.json')
     detector.generar_reporte_texto('reporte_genero.txt')
+    detector.generar_web_interactiva('analisis_genero.html')
 
     # Imprimir resumen
     print("\n" + "="*80)
@@ -527,6 +842,7 @@ def main():
     print(f"👩 Menciones femeninas: {resumen['menciones_femeninas_total']:,}")
     print(f"📊 Ratio de sesgo: {resumen['ratio_sesgo_general']}:1")
     print(f"\n📁 Archivos generados:")
+    print(f"   - analisis_genero.html (🌐 página web interactiva)")
     print(f"   - resultados_deteccion_genero.json (datos completos)")
     print(f"   - reporte_genero.txt (resumen legible)")
 
