@@ -141,11 +141,14 @@ class DetectorGeneroMusical:
         Detecta nombres propios en el texto usando contexto
 
         Returns:
-            dict: {'masculinos': Counter, 'femeninos': Counter}
+            dict: {'masculinos': Counter, 'femeninos': Counter,
+                   'ejemplos_masculinos': dict, 'ejemplos_femeninos': dict}
         """
         nombres_detectados = {
             'masculinos': Counter(),
-            'femeninos': Counter()
+            'femeninos': Counter(),
+            'ejemplos_masculinos': {},
+            'ejemplos_femeninos': {}
         }
 
         # Normalizar contenido
@@ -155,18 +158,22 @@ class DetectorGeneroMusical:
         for nombre in self.nombres_masculinos:
             # Patrón: nombre con mayúscula seguido de apellido o contexto
             patron = r'\b' + nombre.capitalize() + r'\b(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?'
-            matches = re.finditer(patron, contenido, re.IGNORECASE)
-            count = len(list(matches))
-            if count > 0:
-                nombres_detectados['masculinos'][nombre] = count
+            matches = list(re.finditer(patron, contenido, re.IGNORECASE))
+            if len(matches) > 0:
+                nombres_detectados['masculinos'][nombre] = len(matches)
+                # Guardar ejemplos de nombres completos (máximo 3)
+                ejemplos = list(set([m.group(0).strip() for m in matches[:5]]))[:3]
+                nombres_detectados['ejemplos_masculinos'][nombre] = ejemplos
 
         # Buscar nombres femeninos con contexto
         for nombre in self.nombres_femeninos:
             patron = r'\b' + nombre.capitalize() + r'\b(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?'
-            matches = re.finditer(patron, contenido, re.IGNORECASE)
-            count = len(list(matches))
-            if count > 0:
-                nombres_detectados['femeninos'][nombre] = count
+            matches = list(re.finditer(patron, contenido, re.IGNORECASE))
+            if len(matches) > 0:
+                nombres_detectados['femeninos'][nombre] = len(matches)
+                # Guardar ejemplos de nombres completos (máximo 3)
+                ejemplos = list(set([m.group(0).strip() for m in matches[:5]]))[:3]
+                nombres_detectados['ejemplos_femeninos'][nombre] = ejemplos
 
         return nombres_detectados
 
@@ -299,6 +306,8 @@ class DetectorGeneroMusical:
                     'nombres': {
                         'masculinos': dict(nombres['masculinos']),
                         'femeninos': dict(nombres['femeninos']),
+                        'ejemplos_masculinos': nombres.get('ejemplos_masculinos', {}),
+                        'ejemplos_femeninos': nombres.get('ejemplos_femeninos', {}),
                         'total_masculinos': sum(nombres['masculinos'].values()),
                         'total_femeninos': sum(nombres['femeninos'].values())
                     },
@@ -485,12 +494,35 @@ class DetectorGeneroMusical:
         # Consolidar nombres de todos los archivos
         nombres_masculinos_total = Counter()
         nombres_femeninos_total = Counter()
+        ejemplos_masculinos = {}
+        ejemplos_femeninos = {}
 
         for archivo in self.resultados['archivos']:
             for nombre, count in archivo['detecciones']['nombres']['masculinos'].items():
                 nombres_masculinos_total[nombre] += count
+                # Consolidar ejemplos
+                if 'ejemplos_masculinos' in archivo['detecciones']['nombres']:
+                    if nombre not in ejemplos_masculinos:
+                        ejemplos_masculinos[nombre] = []
+                    ejemplos_masculinos[nombre].extend(
+                        archivo['detecciones']['nombres']['ejemplos_masculinos'].get(nombre, [])
+                    )
+
             for nombre, count in archivo['detecciones']['nombres']['femeninos'].items():
                 nombres_femeninos_total[nombre] += count
+                # Consolidar ejemplos
+                if 'ejemplos_femeninos' in archivo['detecciones']['nombres']:
+                    if nombre not in ejemplos_femeninos:
+                        ejemplos_femeninos[nombre] = []
+                    ejemplos_femeninos[nombre].extend(
+                        archivo['detecciones']['nombres']['ejemplos_femeninos'].get(nombre, [])
+                    )
+
+        # Limpiar y deduplicar ejemplos
+        for nombre in ejemplos_masculinos:
+            ejemplos_masculinos[nombre] = list(set(ejemplos_masculinos[nombre]))[:3]
+        for nombre in ejemplos_femeninos:
+            ejemplos_femeninos[nombre] = list(set(ejemplos_femeninos[nombre]))[:3]
 
         # Top 10 nombres
         top_masculinos = nombres_masculinos_total.most_common(10)
@@ -631,17 +663,24 @@ class DetectorGeneroMusical:
             color: #f687b3;
         }}
         .name-item {{
-            padding: 10px;
-            margin-bottom: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
             background: #f8f9fa;
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
         }}
         .name-item .name {{
             font-weight: 600;
             text-transform: capitalize;
+            flex: 1;
+        }}
+        .name-item .ejemplos {{
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+            margin-top: 4px;
         }}
         .name-item .count {{
             background: #667eea;
@@ -781,9 +820,16 @@ class DetectorGeneroMusical:
 
         # Agregar nombres masculinos
         for nombre, count in top_masculinos:
+            ejemplos_str = ""
+            if nombre in ejemplos_masculinos and ejemplos_masculinos[nombre]:
+                ejemplos_str = f'<div class="ejemplos">ej: {", ".join(ejemplos_masculinos[nombre])}</div>'
+
             html_content += f"""
                     <div class="name-item">
-                        <span class="name">{nombre.capitalize()}</span>
+                        <div class="name">
+                            {nombre.capitalize()}
+                            {ejemplos_str}
+                        </div>
                         <span class="count">{count:,}</span>
                     </div>
 """
@@ -796,9 +842,16 @@ class DetectorGeneroMusical:
 
         # Agregar nombres femeninos
         for nombre, count in top_femeninos:
+            ejemplos_str = ""
+            if nombre in ejemplos_femeninos and ejemplos_femeninos[nombre]:
+                ejemplos_str = f'<div class="ejemplos">ej: {", ".join(ejemplos_femeninos[nombre])}</div>'
+
             html_content += f"""
                     <div class="name-item">
-                        <span class="name">{nombre.capitalize()}</span>
+                        <div class="name">
+                            {nombre.capitalize()}
+                            {ejemplos_str}
+                        </div>
                         <span class="count">{count:,}</span>
                     </div>
 """
