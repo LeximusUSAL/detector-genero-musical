@@ -129,6 +129,12 @@ start analisis_genero.html
 **[📖 TUTORIAL COMPLETO](./TUTORIAL_DETECTOR_GENERO.md)** - Guía paso a paso con:
 
 - Instalación detallada
+
+**[🌐 EJEMPLO WEB INTERACTIVA](./EJEMPLO_WEB.md)** - Capturas visuales de la interfaz generada:
+
+- ASCII art de cada sección
+- Paleta de colores y diseño responsive
+- Casos de uso y comparación de formatos
 - Configuración avanzada (agregar nombres, profesiones)
 - Adaptación a diferentes épocas (s. XIX, XX, XXI)
 - Casos de uso académicos
