@@ -1006,15 +1006,40 @@ def main():
     """
     Ejecuta el análisis completo
 
-    MODIFICAR ESTA RUTA según tu estructura de directorios:
+    Uso:
+        python3 detector_genero_musical.py /ruta/a/tus/archivos
+
+    Si no se especifica ruta, pedirá ingresarla manualmente.
     """
-    # RUTA DE EJEMPLO - MODIFICAR SEGÚN TU CASO
-    directorio_base = "/Users/maria/Desktop/REVISTAS TXT PARA WEBS ESTADÍSTICAS"
+    import sys
 
-    # También puedes analizar un subdirectorio específico:
-    # directorio_base = "/Users/maria/Desktop/REVISTAS TXT PARA WEBS ESTADÍSTICAS/TXT-ElSol"
+    # Verificar si se pasó directorio como argumento
+    if len(sys.argv) > 1:
+        directorio_base = sys.argv[1]
+    else:
+        print("🎵 DETECTOR AUTOMÁTICO DE GÉNERO EN PERSONAS MUSICALES")
+        print("="*80)
+        print("\n⚠️  No se especificó directorio.\n")
+        print("Opciones:")
+        print("  1. Ejecutar con argumento: python3 detector_genero_musical.py /ruta/a/archivos")
+        print("  2. Ingresar ruta manualmente ahora\n")
 
-    print("🎵 DETECTOR AUTOMÁTICO DE GÉNERO EN PERSONAS MUSICALES")
+        directorio_base = input("📂 Ingresa la ruta completa a tu directorio de archivos TXT: ").strip()
+
+        # Eliminar comillas si el usuario las pegó
+        directorio_base = directorio_base.strip('"').strip("'")
+
+    # Validar que el directorio existe
+    if not os.path.exists(directorio_base):
+        print(f"\n❌ ERROR: El directorio '{directorio_base}' no existe.")
+        print("   Verifica la ruta e intenta nuevamente.\n")
+        return
+
+    if not os.path.isdir(directorio_base):
+        print(f"\n❌ ERROR: '{directorio_base}' no es un directorio.\n")
+        return
+
+    print("\n🎵 DETECTOR AUTOMÁTICO DE GÉNERO EN PERSONAS MUSICALES")
     print("="*80)
     print(f"📂 Directorio: {directorio_base}\n")
 

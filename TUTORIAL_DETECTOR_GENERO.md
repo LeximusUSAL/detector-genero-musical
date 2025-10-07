@@ -60,17 +60,40 @@ Debe mostrar `Python 3.7.0` o superior.
 
 ```bash
 # Opción 1: Clonar repositorio completo
-git clone https://github.com/LexiMusUSAL.git
-cd LexiMusUSAL
+git clone https://github.com/LeximusUSAL/detector-genero-musical.git
+cd detector-genero-musical
 
 # Opción 2: Descargar solo el script
-curl -O https://raw.githubusercontent.com/tu-usuario/LexiMusUSAL/main/detector_genero_musical.py
+curl -O https://raw.githubusercontent.com/LeximusUSAL/detector-genero-musical/main/detector_genero_musical.py
 ```
 
-### Dar permisos de ejecución
+### Dar permisos de ejecución (opcional)
 
 ```bash
 chmod +x detector_genero_musical.py
+```
+
+### Verificación rápida
+
+Prueba el script sin argumentos para ver el mensaje de ayuda:
+
+```bash
+python3 detector_genero_musical.py
+```
+
+Deberías ver:
+
+```
+🎵 DETECTOR AUTOMÁTICO DE GÉNERO EN PERSONAS MUSICALES
+================================================================================
+
+⚠️  No se especificó directorio.
+
+Opciones:
+  1. Ejecutar con argumento: python3 detector_genero_musical.py /ruta/a/archivos
+  2. Ingresar ruta manualmente ahora
+
+📂 Ingresa la ruta completa a tu directorio de archivos TXT:
 ```
 
 ---
@@ -88,25 +111,32 @@ Organiza tus archivos `.txt` en un directorio:
   └── revista_1843_01.txt
 ```
 
-### 2. Modificar la ruta en el script
+### 2. Ejecutar el análisis
 
-Abre `detector_genero_musical.py` y modifica la línea 450:
+**Opción 1: Con argumento de línea de comandos (recomendado)**
 
-```python
-# ANTES
-directorio_base = "/Users/maria/Desktop/REVISTAS TXT PARA WEBS ESTADÍSTICAS"
-
-# DESPUÉS
-directorio_base = "/ruta/a/tu/proyecto/textos"
+```bash
+python3 detector_genero_musical.py /ruta/a/tu/proyecto/textos
 ```
 
-### 3. Ejecutar el análisis
+**Opción 2: Modo interactivo**
 
 ```bash
 python3 detector_genero_musical.py
+# El script te pedirá ingresar la ruta manualmente
 ```
 
-### 4. Revisar los resultados
+**Ejemplo real:**
+
+```bash
+# Si tus archivos están en el escritorio:
+python3 detector_genero_musical.py /Users/tu_nombre/Desktop/mis_textos
+
+# Si están en Documentos:
+python3 detector_genero_musical.py /home/usuario/Documentos/corpus_musical
+```
+
+### 3. Revisar los resultados
 
 El script genera dos archivos:
 
@@ -331,12 +361,9 @@ self.profesiones_femeninas.extend([
 
 ### Caso 1: Análisis de una revista específica
 
-```python
-# Modificar main() para analizar solo "Revista Musical de Bilbao"
-directorio_base = "/corpus/revistas/TXT-Revista-Musical-Bilbao-1909-1913"
-
-detector = DetectorGeneroMusical(directorio_base)
-resultados = detector.analizar_directorio()
+```bash
+# Analizar solo "Revista Musical de Bilbao"
+python3 detector_genero_musical.py /corpus/revistas/TXT-Revista-Musical-Bilbao-1909-1913
 ```
 
 **Pregunta de investigación:**
@@ -348,23 +375,25 @@ Ejecuta el análisis por décadas:
 
 ```bash
 # Década 1920
-python3 detector_genero_musical.py --dir="/corpus/1920-1930"
+python3 detector_genero_musical.py /corpus/1920-1930
 
 # Década 1980
-python3 detector_genero_musical.py --dir="/corpus/1980-1990"
+python3 detector_genero_musical.py /corpus/1980-1990
 
 # Década 2010
-python3 detector_genero_musical.py --dir="/corpus/2010-2020"
+python3 detector_genero_musical.py /corpus/2010-2020
 ```
 
 Compara los ratios de sesgo para estudiar evolución histórica.
 
 ### Caso 3: Análisis por tipo de contenido
 
-```python
-# Críticas musicales vs. Entrevistas
-detector_criticas = DetectorGeneroMusical("/corpus/criticas")
-detector_entrevistas = DetectorGeneroMusical("/corpus/entrevistas")
+```bash
+# Críticas musicales
+python3 detector_genero_musical.py /corpus/criticas
+
+# Entrevistas
+python3 detector_genero_musical.py /corpus/entrevistas
 
 # ¿Hay diferencias en representación de género según el género periodístico?
 ```
@@ -437,7 +466,7 @@ Si utilizas esta herramienta en tu investigación, cita:
   title = {Detector Automático de Género en Personas Musicales},
   year = {2025},
   publisher = {Universidad de Salamanca},
-  url = {https://github.com/tu-usuario/LexiMusUSAL}
+  url = {https://github.com/LeximusUSAL/detector-genero-musical}
 }
 ```
 
@@ -459,7 +488,7 @@ Para agregar nombres, profesiones o mejorar el algoritmo:
 
 **Proyecto:** LexiMus - Universidad de Salamanca
 **Financiación:** PID2022-139589NB-C33
-**GitHub:** https://github.com/LexiMusUSAL
+**GitHub:** https://github.com/LeximusUSAL/detector-genero-musical
 
 ---
 

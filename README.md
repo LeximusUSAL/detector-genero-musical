@@ -62,15 +62,23 @@ chmod +x detector_genero_musical.py
 
 ### 3. Uso básico
 
+**Opción 1: Especificar directorio directamente (recomendado)**
+
 ```bash
-# Editar la ruta del directorio en línea 450 del script
-nano detector_genero_musical.py
+python3 detector_genero_musical.py /ruta/a/tus/archivos/txt
+```
 
-# Modificar esta línea:
-directorio_base = "/ruta/a/tus/archivos/txt"
+**Opción 2: Modo interactivo**
 
-# Ejecutar
+```bash
 python3 detector_genero_musical.py
+# El script te pedirá ingresar la ruta manualmente
+```
+
+**Ejemplo real:**
+
+```bash
+python3 detector_genero_musical.py /Users/tu_nombre/Desktop/corpus_musical
 ```
 
 ### 4. Resultados
