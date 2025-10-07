@@ -200,17 +200,22 @@ class DetectorGeneroMusical:
             matches_simple = re.finditer(patron_simple, contenido, re.IGNORECASE)
 
             # Patrón 2: Nombre + Apellido(s) - Más específico
-            # Captura: "Manuel de Falla", "José García López", "Isaac Albéniz"
-            # Busca nombre + partícula (opcional) + apellido + segundo apellido (opcional)
-            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+)?[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?\b'
+            # Captura nombres completos en español, francés, inglés y alemán:
+            # Español: "Manuel de Falla", "José García López", "Isaac Albéniz"
+            # Francés: "Claude Debussy", "Maurice Ravel", "Gabriel Fauré"
+            # Inglés: "George Gershwin", "Benjamin Britten", "William Byrd"
+            # Alemán: "Ludwig van Beethoven", "Johann Sebastian Bach", "Richard Wagner"
+            # Busca: nombre + partícula (opcional) + apellido + segundo apellido/partícula (opcional)
+            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+|der\s+|den\s+|zu\s+|vom\s+|le\s+|la\s+|du\s+|des\s+|d\')?[A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+(?:\s+(?:de\s+|del\s+|von\s+|van\s+|der\s+|zu\s+)?[A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+)?\b'
             matches_completos = list(re.finditer(patron_completo, contenido, re.IGNORECASE))
 
             # Contar coincidencias de nombres completos (prioritario)
             if matches_completos:
                 for match in matches_completos:
                     nombre_completo = match.group(0)
-                    # Limpiar: remover palabras en minúscula al final (verbos, artículos)
-                    nombre_completo = re.sub(r'\s+[a-záéíóúñ]+$', '', nombre_completo)
+                    # Limpiar: remover verbos/artículos comunes al final (pero NO partículas nobiliarias)
+                    # Preserva: "van", "von", "de", "del", "der", "zu" cuando forman parte del apellido
+                    nombre_completo = re.sub(r'\s+(es|fue|está|será|tiene|era|y|o|con|para|por|en|el|la|los|las|un|una)$', '', nombre_completo, flags=re.IGNORECASE)
                     nombres_detectados['masculinos_completos'].append(nombre_completo)
                     nombres_detectados['masculinos'][nombre] += 1
             else:
@@ -226,16 +231,21 @@ class DetectorGeneroMusical:
             matches_simple = re.finditer(patron_simple, contenido, re.IGNORECASE)
 
             # Patrón 2: Nombre + Apellido(s)
-            # Captura: "María Callas", "Carmen de Burgos", "Rosa García Ascot"
-            # Busca nombre + partícula (opcional) + apellido + segundo apellido (opcional)
-            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+)?[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?\b'
+            # Captura nombres completos en español, francés, inglés y alemán:
+            # Español: "María Callas", "Carmen de Burgos", "Rosa García Ascot"
+            # Francés: "Germaine Tailleferre", "Nadia Boulanger", "Lili Boulanger"
+            # Inglés: "Elizabeth Maconchy", "Rebecca Clarke", "Amy Beach"
+            # Alemán: "Clara Schumann", "Fanny Mendelssohn", "Alma Mahler"
+            # Busca: nombre + partícula (opcional) + apellido + segundo apellido/partícula (opcional)
+            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+|der\s+|den\s+|zu\s+|vom\s+|le\s+|la\s+|du\s+|des\s+|d\')?[A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+(?:\s+(?:de\s+|del\s+|von\s+|van\s+|der\s+|zu\s+)?[A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+)?\b'
             matches_completos = list(re.finditer(patron_completo, contenido, re.IGNORECASE))
 
             if matches_completos:
                 for match in matches_completos:
                     nombre_completo = match.group(0)
-                    # Limpiar: remover palabras en minúscula al final (verbos, artículos)
-                    nombre_completo = re.sub(r'\s+[a-záéíóúñ]+$', '', nombre_completo)
+                    # Limpiar: remover verbos/artículos comunes al final (pero NO partículas nobiliarias)
+                    # Preserva: "van", "von", "de", "del", "der", "zu" cuando forman parte del apellido
+                    nombre_completo = re.sub(r'\s+(es|fue|está|será|tiene|era|y|o|con|para|por|en|el|la|los|las|un|una)$', '', nombre_completo, flags=re.IGNORECASE)
                     nombres_detectados['femeninos_completos'].append(nombre_completo)
                     nombres_detectados['femeninos'][nombre] += 1
             else:
