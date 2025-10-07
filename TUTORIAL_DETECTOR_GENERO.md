@@ -60,7 +60,7 @@ Debe mostrar `Python 3.7.0` o superior.
 
 ```bash
 # Opción 1: Clonar repositorio completo
-git clone https://github.com/tu-usuario/LexiMusUSAL.git
+git clone https://github.com/LexiMusUSAL.git
 cd LexiMusUSAL
 
 # Opción 2: Descargar solo el script
@@ -459,7 +459,7 @@ Para agregar nombres, profesiones o mejorar el algoritmo:
 
 **Proyecto:** LexiMus - Universidad de Salamanca
 **Financiación:** PID2022-139589NB-C33
-**GitHub:** https://github.com/tu-usuario/LexiMusUSAL
+**GitHub:** https://github.com/LexiMusUSAL
 
 ---
 
