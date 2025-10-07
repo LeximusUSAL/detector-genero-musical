@@ -471,6 +471,532 @@ class DetectorGeneroMusical:
         print(f"✅ Reporte guardado en: {output_file}")
         return output_file
 
+    def generar_web_interactiva(self, output_file='analisis_genero.html'):
+        """
+        Genera una página web interactiva con visualizaciones
+
+        Args:
+            output_file (str): Nombre del archivo HTML de salida
+        """
+        if not self.resultados:
+            print("❌ Error: No hay resultados para generar web. Ejecuta analizar_directorio() primero.")
+            return None
+
+        meta = self.resultados['metadata']
+        resumen = self.resultados['resumen_general']
+        ratio = resumen['ratio_sesgo_general']
+
+        # Preparar datos para gráficos
+        archivos_data = []
+        for archivo in self.resultados['archivos'][:20]:  # Top 20 archivos
+            if archivo['totales']['ratio_sesgo'] != float('inf'):
+                archivos_data.append({
+                    'nombre': archivo['archivo'][:30],  # Truncar nombre
+                    'masculinas': archivo['totales']['menciones_masculinas'],
+                    'femeninas': archivo['totales']['menciones_femeninas'],
+                    'ratio': archivo['totales']['ratio_sesgo']
+                })
+
+        # Top nombres detectados
+        todos_nombres_masc = Counter()
+        todos_nombres_fem = Counter()
+        for archivo in self.resultados['archivos']:
+            for nombre, count in archivo['detecciones']['nombres']['masculinos'].items():
+                todos_nombres_masc[nombre] += count
+            for nombre, count in archivo['detecciones']['nombres']['femeninos'].items():
+                todos_nombres_fem[nombre] += count
+
+        top_nombres_masc = todos_nombres_masc.most_common(10)
+        top_nombres_fem = todos_nombres_fem.most_common(10)
+
+        # Generar HTML
+        html_content = f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Género en Personas Musicales</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }}
+
+        .container {{
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }}
+
+        header {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }}
+
+        header h1 {{
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }}
+
+        header p {{
+            font-size: 1.1em;
+            opacity: 0.9;
+        }}
+
+        .stats-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 40px;
+            background: #f8f9fa;
+        }}
+
+        .stat-card {{
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }}
+
+        .stat-card:hover {{
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }}
+
+        .stat-card .icon {{
+            font-size: 3em;
+            margin-bottom: 15px;
+        }}
+
+        .stat-card .value {{
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }}
+
+        .stat-card.masculino .value {{
+            color: #3498db;
+        }}
+
+        .stat-card.femenino .value {{
+            color: #e91e63;
+        }}
+
+        .stat-card.ratio .value {{
+            color: #f39c12;
+        }}
+
+        .stat-card.archivos .value {{
+            color: #9b59b6;
+        }}
+
+        .stat-card .label {{
+            font-size: 1.1em;
+            color: #666;
+        }}
+
+        .interpretation {{
+            padding: 30px 40px;
+            background: #fff3cd;
+            border-left: 5px solid #f39c12;
+            margin: 0 40px;
+            border-radius: 10px;
+        }}
+
+        .interpretation.extreme {{
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }}
+
+        .interpretation.high {{
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }}
+
+        .interpretation.moderate {{
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+        }}
+
+        .interpretation.balanced {{
+            background: #d4edda;
+            border-left-color: #28a745;
+        }}
+
+        .interpretation h3 {{
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }}
+
+        .charts-section {{
+            padding: 40px;
+        }}
+
+        .chart-container {{
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }}
+
+        .chart-container h2 {{
+            margin-bottom: 20px;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }}
+
+        canvas {{
+            max-height: 400px;
+        }}
+
+        .metadata {{
+            padding: 40px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }}
+
+        .metadata-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }}
+
+        .metadata-item {{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }}
+
+        .metadata-item .icon {{
+            font-size: 1.5em;
+        }}
+
+        .metadata-item .info {{
+            flex: 1;
+        }}
+
+        .metadata-item .label {{
+            font-size: 0.9em;
+            color: #666;
+        }}
+
+        .metadata-item .value {{
+            font-weight: bold;
+            color: #333;
+        }}
+
+        footer {{
+            text-align: center;
+            padding: 30px;
+            background: #2c3e50;
+            color: white;
+        }}
+
+        footer a {{
+            color: #3498db;
+            text-decoration: none;
+        }}
+
+        footer a:hover {{
+            text-decoration: underline;
+        }}
+
+        .top-names {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }}
+
+        .names-list {{
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }}
+
+        .names-list h3 {{
+            margin-bottom: 15px;
+            color: #667eea;
+        }}
+
+        .names-list.masculino h3 {{
+            color: #3498db;
+        }}
+
+        .names-list.femenino h3 {{
+            color: #e91e63;
+        }}
+
+        .name-item {{
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }}
+
+        .name-item .name {{
+            font-weight: bold;
+        }}
+
+        .name-item .count {{
+            color: #666;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 Análisis de Género en Personas Musicales</h1>
+            <p>Proyecto LexiMus - Universidad de Salamanca</p>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card masculino">
+                <div class="icon">👨</div>
+                <div class="value">{resumen['menciones_masculinas_total']:,}</div>
+                <div class="label">Menciones Masculinas<br>({resumen['porcentaje_masculino']}%)</div>
+            </div>
+
+            <div class="stat-card femenino">
+                <div class="icon">👩</div>
+                <div class="value">{resumen['menciones_femeninas_total']:,}</div>
+                <div class="label">Menciones Femeninas<br>({resumen['porcentaje_femenino']}%)</div>
+            </div>
+
+            <div class="stat-card ratio">
+                <div class="icon">📊</div>
+                <div class="value">{"∞" if ratio == float('inf') else f"{ratio}"} : 1</div>
+                <div class="label">Ratio de Sesgo<br>(Masculino:Femenino)</div>
+            </div>
+
+            <div class="stat-card archivos">
+                <div class="icon">📄</div>
+                <div class="value">{meta['total_archivos']}</div>
+                <div class="label">Archivos Analizados</div>
+            </div>
+        </div>
+
+        <div class="interpretation {'extreme' if ratio > 10 else 'high' if ratio > 5 else 'moderate' if ratio > 2 else 'balanced'}">
+            <h3>📈 Interpretación del Sesgo de Género</h3>
+            <p>
+                {'❌ <strong>Sesgo extremo detectado.</strong> La dominancia masculina es severa (' + str(ratio) + ':1), indicando una representación casi exclusiva de hombres en el corpus analizado.' if ratio > 10 else
+                 '⚠️ <strong>Sesgo alto detectado.</strong> Existe un desbalance significativo (' + str(ratio) + ':1) hacia menciones masculinas.' if ratio > 5 else
+                 '⚠️ <strong>Sesgo moderado.</strong> Las menciones masculinas superan notablemente a las femeninas (' + str(ratio) + ':1).' if ratio > 2 else
+                 '✅ <strong>Representación relativamente equilibrada.</strong> El ratio (' + str(ratio) + ':1) sugiere una distribución más equitativa.'}
+            </p>
+            <p style="margin-top: 10px; font-size: 0.95em; color: #666;">
+                <strong>Contexto:</strong> En el proyecto LexiMus, el análisis de 25.8 millones de palabras en prensa musical española (1842-2024) reveló un ratio de 17.8:1, evidenciando dominancia masculina histórica en el periodismo musical.
+            </p>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-container">
+                <h2>📊 Distribución General por Género</h2>
+                <canvas id="pieChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h2>📈 Comparativa por Archivo (Top 20)</h2>
+                <canvas id="barChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h2>👥 Nombres Más Mencionados</h2>
+                <div class="top-names">
+                    <div class="names-list masculino">
+                        <h3>👨 Top 10 Masculinos</h3>
+                        {''.join([f'<div class="name-item"><span class="name">{nombre.capitalize()}</span><span class="count">{count} menciones</span></div>' for nombre, count in top_nombres_masc])}
+                    </div>
+                    <div class="names-list femenino">
+                        <h3>👩 Top 10 Femeninos</h3>
+                        {''.join([f'<div class="name-item"><span class="name">{nombre.capitalize()}</span><span class="count">{count} menciones</span></div>' for nombre, count in top_nombres_fem])}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="metadata">
+            <h2 style="margin-bottom: 20px; color: #667eea;">ℹ️ Información del Análisis</h2>
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <span class="icon">📂</span>
+                    <div class="info">
+                        <div class="label">Directorio analizado</div>
+                        <div class="value">{meta['directorio']}</div>
+                    </div>
+                </div>
+                <div class="metadata-item">
+                    <span class="icon">📝</span>
+                    <div class="info">
+                        <div class="label">Total de palabras</div>
+                        <div class="value">{meta['total_palabras']:,}</div>
+                    </div>
+                </div>
+                <div class="metadata-item">
+                    <span class="icon">📅</span>
+                    <div class="info">
+                        <div class="label">Fecha de análisis</div>
+                        <div class="value">{meta['fecha_analisis']}</div>
+                    </div>
+                </div>
+                <div class="metadata-item">
+                    <span class="icon">🔬</span>
+                    <div class="info">
+                        <div class="label">Metodología</div>
+                        <div class="value">Detección lingüística automática</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Proyecto LexiMus</strong> - Universidad de Salamanca, Instituto Complutense de Ciencias Musicales, Universidad de La Rioja</p>
+            <p>Financiación: PID2022-139589NB-C33</p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com/LeximusUSAL/detector-genero-musical" target="_blank">🔗 GitHub Repository</a> |
+                <a href="resultados_deteccion_genero.json" target="_blank">📊 Datos JSON</a>
+            </p>
+            <p style="margin-top: 15px; font-size: 0.9em; opacity: 0.8;">
+                🤖 Generado con Detector Automático de Género Musical v1.0
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Gráfico de pastel
+        const ctxPie = document.getElementById('pieChart').getContext('2d');
+        new Chart(ctxPie, {{
+            type: 'doughnut',
+            data: {{
+                labels: ['Masculino', 'Femenino'],
+                datasets: [{{
+                    data: [{resumen['menciones_masculinas_total']}, {resumen['menciones_femeninas_total']}],
+                    backgroundColor: ['#3498db', '#e91e63'],
+                    borderWidth: 0
+                }}]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {{
+                    legend: {{
+                        position: 'bottom',
+                        labels: {{
+                            font: {{
+                                size: 14
+                            }},
+                            padding: 20
+                        }}
+                    }},
+                    tooltip: {{
+                        callbacks: {{
+                            label: function(context) {{
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = {resumen['menciones_masculinas_total'] + resumen['menciones_femeninas_total']};
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return label + ': ' + value.toLocaleString() + ' (' + percentage + '%)';
+                            }}
+                        }}
+                    }}
+                }}
+            }}
+        }});
+
+        // Gráfico de barras
+        const ctxBar = document.getElementById('barChart').getContext('2d');
+        new Chart(ctxBar, {{
+            type: 'bar',
+            data: {{
+                labels: {json.dumps([a['nombre'] for a in archivos_data])},
+                datasets: [
+                    {{
+                        label: 'Masculinas',
+                        data: {json.dumps([a['masculinas'] for a in archivos_data])},
+                        backgroundColor: '#3498db',
+                        borderRadius: 5
+                    }},
+                    {{
+                        label: 'Femeninas',
+                        data: {json.dumps([a['femeninas'] for a in archivos_data])},
+                        backgroundColor: '#e91e63',
+                        borderRadius: 5
+                    }}
+                ]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {{
+                    x: {{
+                        stacked: false,
+                        ticks: {{
+                            font: {{
+                                size: 10
+                            }},
+                            maxRotation: 90,
+                            minRotation: 45
+                        }}
+                    }},
+                    y: {{
+                        stacked: false,
+                        beginAtZero: true
+                    }}
+                }},
+                plugins: {{
+                    legend: {{
+                        position: 'top',
+                        labels: {{
+                            font: {{
+                                size: 14
+                            }}
+                        }}
+                    }},
+                    tooltip: {{
+                        callbacks: {{
+                            afterLabel: function(context) {{
+                                const index = context.dataIndex;
+                                const ratios = {json.dumps([a['ratio'] for a in archivos_data])};
+                                return 'Ratio: ' + ratios[index] + ':1';
+                            }}
+                        }}
+                    }}
+                }}
+            }}
+        }});
+    </script>
+</body>
+</html>"""
+
+        # Guardar HTML
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+
+        print(f"✅ Web interactiva generada: {output_file}")
+        return output_file
+
 
 # ==========================================================================
 # FUNCIÓN PRINCIPAL
@@ -501,6 +1027,7 @@ def main():
     # Guardar resultados
     detector.guardar_resultados('resultados_deteccion_genero.json')
     detector.generar_reporte_texto('reporte_genero.txt')
+    detector.generar_web_interactiva('analisis_genero.html')
 
     # Imprimir resumen
     print("\n" + "="*80)
@@ -513,6 +1040,8 @@ def main():
     print(f"\n📁 Archivos generados:")
     print(f"   - resultados_deteccion_genero.json (datos completos)")
     print(f"   - reporte_genero.txt (resumen legible)")
+    print(f"   - analisis_genero.html (web interactiva)")
+    print(f"\n🌐 Abre 'analisis_genero.html' en tu navegador para ver los resultados interactivos")
 
 
 if __name__ == "__main__":

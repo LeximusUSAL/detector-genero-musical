@@ -17,6 +17,7 @@ Este proyecto proporciona un **script en Python** que analiza automáticamente t
 ✅ **Análisis de tratamientos formales** (Don/Doña, Sr./Sra., Maestro/Maestra)
 ✅ **Profesiones musicales** con marcadores de género (40+ términos)
 ✅ **Cálculo de ratios de sesgo** (ej: 17.8:1 masculino:femenino)
+✅ **Web interactiva automática** con gráficos Chart.js (NUEVO 🌐)
 ✅ **Exportación JSON** para visualización de datos
 ✅ **Reporte en texto plano** legible para investigadores
 ✅ **Adaptable a diferentes épocas** (1842-2024)
@@ -74,8 +75,9 @@ python3 detector_genero_musical.py
 
 ### 4. Resultados
 
-El script genera automáticamente:
+El script genera automáticamente **3 archivos**:
 
+- **`analisis_genero.html`** - 🌐 **Web interactiva con gráficos** (Chart.js)
 - **`resultados_deteccion_genero.json`** - Datos completos estructurados
 - **`reporte_genero.txt`** - Resumen legible con interpretación
 
@@ -92,7 +94,33 @@ El script genera automáticamente:
 📁 Archivos generados:
    - resultados_deteccion_genero.json (datos completos)
    - reporte_genero.txt (resumen legible)
+   - analisis_genero.html (web interactiva)
+
+🌐 Abre 'analisis_genero.html' en tu navegador para ver los resultados interactivos
 ```
+
+### 5. Ver resultados en web
+
+Abre el archivo `analisis_genero.html` en cualquier navegador:
+
+```bash
+# Mac
+open analisis_genero.html
+
+# Linux
+xdg-open analisis_genero.html
+
+# Windows
+start analisis_genero.html
+```
+
+**La web incluye:**
+- 📊 Gráfico de pastel interactivo (distribución masculino/femenino)
+- 📈 Gráfico de barras comparativo (top 20 archivos)
+- 👥 Rankings de nombres más mencionados (top 10 de cada género)
+- 🎨 Diseño responsive y profesional con gradientes
+- 📱 Compatible con móviles y tablets
+- 🔗 Enlaces a datos JSON y repositorio GitHub
 
 ---
 

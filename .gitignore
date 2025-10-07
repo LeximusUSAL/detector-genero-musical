@@ -26,8 +26,10 @@ wheels/
 # Resultados de análisis (ignorar outputs generados)
 resultados_deteccion_genero.json
 reporte_genero.txt
+analisis_genero.html
 *.json
 *.txt
+*.html
 
 # Excepciones: mantener documentación
 !README.md
