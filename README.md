@@ -13,11 +13,12 @@ Este proyecto proporciona un **script en Python** que analiza automáticamente t
 
 ### Características principales
 
-✅ **Detección automática** de nombres propios masculinos/femeninos (80+ nombres históricos)
+✅ **Detección automática** de nombres completos (nombre + apellido) con 300+ nombres en español, alemán, inglés y francés
+✅ **Soporte de partículas nobiliarias** (de, del, von, van) - detecta "Manuel de Falla", "Ludwig van Beethoven"
 ✅ **Análisis de tratamientos formales** (Don/Doña, Sr./Sra., Maestro/Maestra)
 ✅ **Profesiones musicales** con marcadores de género (40+ términos)
 ✅ **Cálculo de ratios de sesgo** (ej: 17.8:1 masculino:femenino)
-✅ **Web interactiva automática** con gráficos Chart.js (NUEVO 🌐)
+✅ **Web interactiva automática** con gráficos Chart.js y nombres completos detectados
 ✅ **Exportación JSON** para visualización de datos
 ✅ **Reporte en texto plano** legible para investigadores
 ✅ **Adaptable a diferentes épocas** (1842-2024)
@@ -155,10 +156,14 @@ start analisis_genero.html
 
 ## 🔍 ¿Qué Detecta?
 
-### 1. Nombres propios
+### 1. Nombres completos (nombre + apellido)
 
-**Masculinos:** Manuel, Antonio, José, Francisco, Juan, Carlos, Miguel, Pablo...
-**Femeninos:** María, Carmen, Dolores, Pilar, Teresa, Ana, Rosa, Mercedes...
+**Español:** Manuel de Falla, José García López, María Callas, Carmen de Burgos...
+**Alemán:** Ludwig van Beethoven, Wolfgang Amadeus Mozart, Clara Schumann, Fanny Mendelssohn...
+**Inglés:** George Handel, Mary Smith, Elizabeth Taylor...
+**Francés:** Claude Debussy, Germaine Tailleferre, Maurice Ravel...
+
+**Total: 300+ nombres** (150 masculinos + 150 femeninos) con soporte de partículas nobiliarias (de, del, von, van)
 
 ### 2. Tratamientos formales
 
