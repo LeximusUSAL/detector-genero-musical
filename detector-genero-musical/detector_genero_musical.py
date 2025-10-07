@@ -205,17 +205,25 @@ class DetectorGeneroMusical:
             # Francés: "Claude Debussy", "Maurice Ravel", "Gabriel Fauré"
             # Inglés: "George Gershwin", "Benjamin Britten", "William Byrd"
             # Alemán: "Ludwig van Beethoven", "Johann Sebastian Bach", "Richard Wagner"
-            # Busca: nombre + partícula (opcional) + apellido + segundo apellido/partícula (opcional)
-            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+|der\s+|den\s+|zu\s+|vom\s+|le\s+|la\s+|du\s+|des\s+|d\')?[A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+(?:\s+(?:de\s+|del\s+|von\s+|van\s+|der\s+|zu\s+)?[A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+)?\b'
+            # Busca: nombre + partícula (opcional) + apellido(s) con mayúscula inicial
+            # IMPORTANTE: Usa lookahead negativo (?![a-záéíóúñ]) para NO capturar verbos en minúscula
+            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+|der\s+|den\s+|zu\s+|vom\s+|le\s+|la\s+|du\s+|des\s+|d\')?([A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+(?:\s+(?:de\s+|del\s+|von\s+|van\s+|der\s+|zu\s+)?[A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+)?)(?=\s+[a-záéíóúñäöüßàâæçèéêëîïôùûü]|\s*[.,;:!?]|\s*$)'
             matches_completos = list(re.finditer(patron_completo, contenido, re.IGNORECASE))
 
             # Contar coincidencias de nombres completos (prioritario)
             if matches_completos:
                 for match in matches_completos:
-                    nombre_completo = match.group(0)
-                    # Limpiar: remover verbos/artículos comunes al final (pero NO partículas nobiliarias)
-                    # Preserva: "van", "von", "de", "del", "der", "zu" cuando forman parte del apellido
-                    nombre_completo = re.sub(r'\s+(es|fue|está|será|tiene|era|y|o|con|para|por|en|el|la|los|las|un|una)$', '', nombre_completo, flags=re.IGNORECASE)
+                    # Extraer nombre completo: Nombre + Apellido(s) capturado
+                    nombre_base = nombre.capitalize()
+                    apellidos = match.group(1)  # Grupo de captura con apellido(s)
+
+                    # Limpiar verbos comunes en español que empiecen con minúscula
+                    # Lista de verbos frecuentes en contextos biográficos
+                    verbos_comunes = r'\s+(fue|era|nació|murió|compuso|escribió|cantó|tocó|dirigió|interpretó|estudió|vivió|trabajó|falleció|creó|realizó|presentó|actuó|grabó|' \
+                                   r'es|está|será|tiene|había|tuvo|hizo|dio|llegó|pasó|comenzó|terminó|acabó|dejó|vino|volvió|siguió|llevó|produjo|ganó|recibió|obtuvo)'
+                    apellidos_limpios = re.sub(verbos_comunes + r'$', '', apellidos, flags=re.IGNORECASE)
+
+                    nombre_completo = f"{nombre_base} {apellidos_limpios}"
                     nombres_detectados['masculinos_completos'].append(nombre_completo)
                     nombres_detectados['masculinos'][nombre] += 1
             else:
@@ -236,16 +244,24 @@ class DetectorGeneroMusical:
             # Francés: "Germaine Tailleferre", "Nadia Boulanger", "Lili Boulanger"
             # Inglés: "Elizabeth Maconchy", "Rebecca Clarke", "Amy Beach"
             # Alemán: "Clara Schumann", "Fanny Mendelssohn", "Alma Mahler"
-            # Busca: nombre + partícula (opcional) + apellido + segundo apellido/partícula (opcional)
-            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+|der\s+|den\s+|zu\s+|vom\s+|le\s+|la\s+|du\s+|des\s+|d\')?[A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+(?:\s+(?:de\s+|del\s+|von\s+|van\s+|der\s+|zu\s+)?[A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+)?\b'
+            # Busca: nombre + partícula (opcional) + apellido(s) con mayúscula inicial
+            # IMPORTANTE: Usa lookahead negativo (?![a-záéíóúñ]) para NO capturar verbos en minúscula
+            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+|der\s+|den\s+|zu\s+|vom\s+|le\s+|la\s+|du\s+|des\s+|d\')?([A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+(?:\s+(?:de\s+|del\s+|von\s+|van\s+|der\s+|zu\s+)?[A-ZÁÉÍÓÚÑÄÖÜÀÂÆÇÈÉÊËÎÏÔÙÛÜ][a-záéíóúñäöüßàâæçèéêëîïôùûü]+)?)(?=\s+[a-záéíóúñäöüßàâæçèéêëîïôùûü]|\s*[.,;:!?]|\s*$)'
             matches_completos = list(re.finditer(patron_completo, contenido, re.IGNORECASE))
 
             if matches_completos:
                 for match in matches_completos:
-                    nombre_completo = match.group(0)
-                    # Limpiar: remover verbos/artículos comunes al final (pero NO partículas nobiliarias)
-                    # Preserva: "van", "von", "de", "del", "der", "zu" cuando forman parte del apellido
-                    nombre_completo = re.sub(r'\s+(es|fue|está|será|tiene|era|y|o|con|para|por|en|el|la|los|las|un|una)$', '', nombre_completo, flags=re.IGNORECASE)
+                    # Extraer nombre completo: Nombre + Apellido(s) capturado
+                    nombre_base = nombre.capitalize()
+                    apellidos = match.group(1)  # Grupo de captura con apellido(s)
+
+                    # Limpiar verbos comunes en español que empiecen con minúscula
+                    # Lista de verbos frecuentes en contextos biográficos
+                    verbos_comunes = r'\s+(fue|era|nació|murió|compuso|escribió|cantó|tocó|dirigió|interpretó|estudió|vivió|trabajó|falleció|creó|realizó|presentó|actuó|grabó|' \
+                                   r'es|está|será|tiene|había|tuvo|hizo|dio|llegó|pasó|comenzó|terminó|acabó|dejó|vino|volvió|siguió|llevó|produjo|ganó|recibió|obtuvo)'
+                    apellidos_limpios = re.sub(verbos_comunes + r'$', '', apellidos, flags=re.IGNORECASE)
+
+                    nombre_completo = f"{nombre_base} {apellidos_limpios}"
                     nombres_detectados['femeninos_completos'].append(nombre_completo)
                     nombres_detectados['femeninos'][nombre] += 1
             else:
