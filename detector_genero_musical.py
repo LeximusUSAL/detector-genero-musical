@@ -346,6 +346,14 @@ class DetectorGeneroMusical:
 
         print(f"📄 Encontrados {len(archivos_txt)} archivos TXT")
 
+        # Verificar si hay archivos para analizar
+        if len(archivos_txt) == 0:
+            print("\n⚠️  ADVERTENCIA: No se encontraron archivos .txt en el directorio especificado.")
+            print("   Verifica que:")
+            print("   1. La ruta del directorio sea correcta")
+            print("   2. Los archivos tengan extensión .txt (no .pdf, .docx, etc.)")
+            print("   3. Los archivos estén directamente en la carpeta o subcarpetas\n")
+
         # Analizar cada archivo
         resultados_archivos = []
         total_masc = 0
