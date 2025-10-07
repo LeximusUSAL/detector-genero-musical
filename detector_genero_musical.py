@@ -921,93 +921,93 @@ class DetectorGeneroMusical:
     <script>
         // Gráfico de Pastel
         const ctx1 = document.getElementById('genderChart').getContext('2d');
-        new Chart(ctx1, {{
+        new Chart(ctx1, {
             type: 'pie',
-            data: {{
+            data: {
                 labels: ['Masculino', 'Femenino'],
-                datasets: [{{
-                    data: [{resumen['menciones_masculinas_total']}, {resumen['menciones_femeninas_total']}],
+                datasets: [{
+                    data: [""" + str(resumen['menciones_masculinas_total']) + """, """ + str(resumen['menciones_femeninas_total']) + """],
                     backgroundColor: ['#667eea', '#f687b3'],
                     borderWidth: 2,
                     borderColor: '#fff'
-                }}]
-            }},
-            options: {{
+                }]
+            },
+            options: {
                 responsive: true,
-                plugins: {{
-                    legend: {{
+                plugins: {
+                    legend: {
                         position: 'bottom',
-                        labels: {{
-                            font: {{ size: 14 }},
+                        labels: {
+                            font: { size: 14 },
                             padding: 20
-                        }}
-                    }},
-                    tooltip: {{
-                        callbacks: {{
-                            label: function(context) {{
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
                                 let label = context.label || '';
                                 let value = context.parsed || 0;
-                                let total = {resumen['menciones_masculinas_total'] + resumen['menciones_femeninas_total']};
+                                let total = """ + str(resumen['menciones_masculinas_total'] + resumen['menciones_femeninas_total']) + """;
                                 let percentage = ((value / total) * 100).toFixed(1);
                                 return label + ': ' + value.toLocaleString() + ' (' + percentage + '%)';
-                            }}
-                        }}
-                    }}
-                }}
-            }}
-        }});
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
         // Gráfico de Barras
         const ctx2 = document.getElementById('comparisonChart').getContext('2d');
-        new Chart(ctx2, {{
+        new Chart(ctx2, {
             type: 'bar',
-            data: {{
+            data: {
                 labels: ['Menciones Totales'],
                 datasets: [
-                    {{
+                    {
                         label: 'Masculino',
-                        data: [{resumen['menciones_masculinas_total']}],
+                        data: [""" + str(resumen['menciones_masculinas_total']) + """],
                         backgroundColor: '#667eea',
                         borderRadius: 10
-                    }},
-                    {{
+                    },
+                    {
                         label: 'Femenino',
-                        data: [{resumen['menciones_femeninas_total']}],
+                        data: [""" + str(resumen['menciones_femeninas_total']) + """],
                         backgroundColor: '#f687b3',
                         borderRadius: 10
-                    }}
+                    }
                 ]
-            }},
-            options: {{
+            },
+            options: {
                 responsive: true,
-                scales: {{
-                    y: {{
+                scales: {
+                    y: {
                         beginAtZero: true,
-                        ticks: {{
-                            callback: function(value) {{
+                        ticks: {
+                            callback: function(value) {
                                 return value.toLocaleString();
-                            }}
-                        }}
-                    }}
-                }},
-                plugins: {{
-                    legend: {{
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
                         position: 'bottom',
-                        labels: {{
-                            font: {{ size: 14 }},
+                        labels: {
+                            font: { size: 14 },
                             padding: 20
-                        }}
-                    }},
-                    tooltip: {{
-                        callbacks: {{
-                            label: function(context) {{
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
                                 return context.dataset.label + ': ' + context.parsed.y.toLocaleString();
-                            }}
-                        }}
-                    }}
-                }}
-            }}
-        }});
+                            }
+                        }
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>
