@@ -26,7 +26,7 @@ Este proyecto proporciona un **script en Python** que analiza automáticamente t
 
 ## 🎯 Contexto Académico
 
-**Proyecto:** [LexiMus: Léxico y ontología de la música en español](https://www.usal.es)
+**Proyecto:** [LexiMus: Léxico y ontología de la música en español]([https://leximususal.github.io/inicio/])
 **Instituciones:** Universidad de Salamanca, Instituto Complutense de Ciencias Musicales, Universidad de La Rioja
 **Financiación:** PID2022-139589NB-C33
 
