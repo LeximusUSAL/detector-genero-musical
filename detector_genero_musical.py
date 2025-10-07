@@ -35,42 +35,81 @@ class DetectorGeneroMusical:
         self.total_palabras = 0
 
         # =================================================================
-        # LISTAS DE NOMBRES ESPAÑOLES (Expandibles)
+        # LISTAS DE NOMBRES INTERNACIONALES (Español, Alemán, Inglés, Francés)
         # =================================================================
 
-        # Nombres masculinos históricos y actuales comunes en España
+        # Nombres masculinos históricos y actuales
         self.nombres_masculinos = {
+            # === ESPAÑOLES ===
             # Clásicos históricos (s. XIX-XX)
             'manuel', 'antonio', 'josé', 'francisco', 'juan', 'pedro', 'luis',
             'carlos', 'miguel', 'rafael', 'fernando', 'jesús', 'ángel', 'diego',
             'pablo', 'andrés', 'ramón', 'tomás', 'enrique', 'alberto', 'joaquín',
             'ricardo', 'felipe', 'ignacio', 'jaime', 'sergio', 'alejandro',
-
             # Compositores/músicos históricos españoles
-            'isaac', 'tomás', 'joaquín', 'manuel', 'ruperto', 'federico',
-            'emilio', 'pablo', 'andrés', 'adolfo', 'jesús', 'conrado',
-
+            'isaac', 'ruperto', 'federico', 'emilio', 'adolfo', 'conrado',
             # Nombres modernos
             'david', 'daniel', 'jorge', 'adrián', 'iván', 'rubén', 'mario',
-            'oscar', 'héctor', 'raúl', 'víctor', 'hugo', 'marcos', 'álvaro'
+            'oscar', 'héctor', 'raúl', 'víctor', 'hugo', 'marcos', 'álvaro',
+
+            # === ALEMANES ===
+            # Compositores y músicos clásicos
+            'wolfgang', 'ludwig', 'johann', 'johannes', 'richard', 'franz',
+            'robert', 'felix', 'gustav', 'anton', 'max', 'carl', 'karl',
+            'friedrich', 'wilhelm', 'heinrich', 'otto', 'hermann', 'ernst',
+            'paul', 'hans', 'klaus', 'günter', 'werner', 'helmut',
+
+            # === INGLESES ===
+            # Nombres históricos y modernos
+            'william', 'george', 'thomas', 'james', 'john', 'charles',
+            'henry', 'edward', 'benjamin', 'samuel', 'andrew', 'michael',
+            'peter', 'christopher', 'stephen', 'matthew', 'mark', 'luke',
+            'paul', 'simon', 'philip', 'oliver', 'alexander', 'nicholas',
+
+            # === FRANCESES ===
+            # Compositores y músicos
+            'claude', 'maurice', 'gabriel', 'georges', 'hector', 'camille',
+            'jean', 'pierre', 'jacques', 'louis', 'françois', 'rené',
+            'andré', 'philippe', 'michel', 'henri', 'marcel', 'antoine',
+            'laurent', 'nicolas', 'olivier', 'julien', 'sébastien', 'damien'
         }
 
         # Nombres femeninos históricos y actuales
         self.nombres_femeninos = {
+            # === ESPAÑOLAS ===
             # Clásicos históricos
             'maría', 'carmen', 'josefa', 'dolores', 'pilar', 'teresa',
             'ana', 'francisca', 'isabel', 'rosa', 'antonia', 'mercedes',
             'concepción', 'concha', 'victoria', 'angeles', 'trinidad',
             'encarnación', 'amparo', 'remedios', 'esperanza', 'asunción',
-
             # Músicas/cantantes históricas
             'consuelo', 'rosario', 'emilia', 'carlota', 'matilde', 'eugenia',
             'margarita', 'carolina', 'elvira', 'adela', 'julia', 'luisa',
-
             # Nombres modernos
             'laura', 'sara', 'patricia', 'marta', 'elena', 'raquel',
             'cristina', 'paula', 'andrea', 'silvia', 'natalia', 'beatriz',
-            'lucía', 'sofía', 'alba', 'claudia', 'sandra', 'mónica'
+            'lucía', 'sofía', 'alba', 'claudia', 'sandra', 'mónica',
+
+            # === ALEMANAS ===
+            # Compositoras y cantantes
+            'clara', 'fanny', 'alma', 'hildegard', 'sophie', 'louise',
+            'martha', 'greta', 'helene', 'margarete', 'elisabeth', 'anna',
+            'katarina', 'katharina', 'ingrid', 'ursula', 'brigitte', 'petra',
+            'angelika', 'monika', 'sabine', 'susanne', 'heike', 'andrea',
+
+            # === INGLESAS ===
+            # Nombres históricos y modernos
+            'elizabeth', 'mary', 'margaret', 'catherine', 'jane', 'anne',
+            'victoria', 'charlotte', 'emily', 'sarah', 'rebecca', 'jessica',
+            'jennifer', 'lisa', 'susan', 'patricia', 'barbara', 'linda',
+            'emma', 'olivia', 'sophia', 'grace', 'lily', 'lucy', 'amy',
+
+            # === FRANCESAS ===
+            # Compositoras y cantantes
+            'germaine', 'lili', 'nadia', 'cécile', 'louise', 'pauline',
+            'marie', 'jeanne', 'françoise', 'catherine', 'brigitte', 'sylvie',
+            'isabelle', 'sophie', 'claire', 'amélie', 'charlotte', 'julie',
+            'aurélie', 'mélanie', 'céline', 'valérie', 'sandrine', 'florence'
         }
 
         # =================================================================
@@ -137,35 +176,72 @@ class DetectorGeneroMusical:
 
     def detectar_nombres_personas(self, contenido):
         """
-        Detecta nombres propios en el texto usando contexto
+        Detecta nombres propios completos (nombre + apellido) usando múltiples patrones contextuales
 
         Returns:
-            dict: {'masculinos': Counter, 'femeninos': Counter}
+            dict: {
+                'masculinos': Counter,  # Nombres detectados
+                'femeninos': Counter,   # Nombres detectados
+                'masculinos_completos': list,  # Nombres completos encontrados
+                'femeninos_completos': list    # Nombres completos encontrados
+            }
         """
         nombres_detectados = {
             'masculinos': Counter(),
-            'femeninos': Counter()
+            'femeninos': Counter(),
+            'masculinos_completos': [],
+            'femeninos_completos': []
         }
 
-        # Normalizar contenido
-        contenido_lower = contenido.lower()
-
-        # Buscar nombres masculinos con contexto
+        # Buscar nombres masculinos con contexto mejorado
         for nombre in self.nombres_masculinos:
-            # Patrón: nombre con mayúscula seguido de apellido o contexto
-            patron = r'\b' + nombre.capitalize() + r'\b(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?'
-            matches = re.finditer(patron, contenido, re.IGNORECASE)
-            count = len(list(matches))
-            if count > 0:
-                nombres_detectados['masculinos'][nombre] = count
+            # Patrón 1: Nombre solo (menos peso)
+            patron_simple = r'\b' + nombre.capitalize() + r'\b'
+            matches_simple = re.finditer(patron_simple, contenido, re.IGNORECASE)
 
-        # Buscar nombres femeninos con contexto
+            # Patrón 2: Nombre + Apellido(s) - Más específico
+            # Captura: "Manuel de Falla", "José García López", "Isaac Albéniz"
+            # Busca nombre + partícula (opcional) + apellido + segundo apellido (opcional)
+            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+)?[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?\b'
+            matches_completos = list(re.finditer(patron_completo, contenido, re.IGNORECASE))
+
+            # Contar coincidencias de nombres completos (prioritario)
+            if matches_completos:
+                for match in matches_completos:
+                    nombre_completo = match.group(0)
+                    # Limpiar: remover palabras en minúscula al final (verbos, artículos)
+                    nombre_completo = re.sub(r'\s+[a-záéíóúñ]+$', '', nombre_completo)
+                    nombres_detectados['masculinos_completos'].append(nombre_completo)
+                    nombres_detectados['masculinos'][nombre] += 1
+            else:
+                # Si no hay nombre completo, contar menciones simples (con menor certeza)
+                count = len(list(matches_simple))
+                if count > 0:
+                    nombres_detectados['masculinos'][nombre] = count
+
+        # Buscar nombres femeninos con contexto mejorado
         for nombre in self.nombres_femeninos:
-            patron = r'\b' + nombre.capitalize() + r'\b(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?'
-            matches = re.finditer(patron, contenido, re.IGNORECASE)
-            count = len(list(matches))
-            if count > 0:
-                nombres_detectados['femeninos'][nombre] = count
+            # Patrón 1: Nombre solo
+            patron_simple = r'\b' + nombre.capitalize() + r'\b'
+            matches_simple = re.finditer(patron_simple, contenido, re.IGNORECASE)
+
+            # Patrón 2: Nombre + Apellido(s)
+            # Captura: "María Callas", "Carmen de Burgos", "Rosa García Ascot"
+            # Busca nombre + partícula (opcional) + apellido + segundo apellido (opcional)
+            patron_completo = r'\b' + nombre.capitalize() + r'\s+(?:de\s+|del\s+|de\s+la\s+|de\s+las\s+|de\s+los\s+|von\s+|van\s+)?[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?\b'
+            matches_completos = list(re.finditer(patron_completo, contenido, re.IGNORECASE))
+
+            if matches_completos:
+                for match in matches_completos:
+                    nombre_completo = match.group(0)
+                    # Limpiar: remover palabras en minúscula al final (verbos, artículos)
+                    nombre_completo = re.sub(r'\s+[a-záéíóúñ]+$', '', nombre_completo)
+                    nombres_detectados['femeninos_completos'].append(nombre_completo)
+                    nombres_detectados['femeninos'][nombre] += 1
+            else:
+                count = len(list(matches_simple))
+                if count > 0:
+                    nombres_detectados['femeninos'][nombre] = count
 
         return nombres_detectados
 
@@ -298,6 +374,8 @@ class DetectorGeneroMusical:
                     'nombres': {
                         'masculinos': dict(nombres['masculinos']),
                         'femeninos': dict(nombres['femeninos']),
+                        'masculinos_completos': nombres['masculinos_completos'],
+                        'femeninos_completos': nombres['femeninos_completos'],
                         'total_masculinos': sum(nombres['masculinos'].values()),
                         'total_femeninos': sum(nombres['femeninos'].values())
                     },
